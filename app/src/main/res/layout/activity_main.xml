@@ -66,13 +66,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStock" />
 
-    <ListView
-        android:id="@+id/lisLibros"
-        android:layout_width="409dp"
-        android:layout_height="376dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
+    <Button
+        android:id="@+id/btnListado"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="114dp"
+        android:text="Ir Listado"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnRegistrar" />
+        app:layout_constraintTop_toBottomOf="@+id/txtStock" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
