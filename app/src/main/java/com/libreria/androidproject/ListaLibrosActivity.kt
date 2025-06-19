@@ -1,7 +1,9 @@
 package com.libreria.androidproject
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
@@ -24,6 +26,7 @@ class ListaLibrosActivity : AppCompatActivity() {
 
         dbHelper = LibroDBHelper(this)
         listView = findViewById(lisLibros)
+        val btnRegistrarNuevoLibro = findViewById<Button>(R.id.btnNuevoLibro)
 
         listView.setOnItemClickListener { _, _, position, _ ->
             val libro = libros[position]
@@ -31,6 +34,10 @@ class ListaLibrosActivity : AppCompatActivity() {
         }
 
         cargarLista()
+
+        btnRegistrarNuevoLibro.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
     }
 
     private fun cargarLista() {

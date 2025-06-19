@@ -24,9 +24,19 @@
     <ListView
         android:id="@+id/lisLibros"
         android:layout_width="363dp"
-        android:layout_height="647dp"
+        android:layout_height="607dp"
         android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="56dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblTituloListado" />
+
+    <Button
+        android:id="@+id/btnNuevoLibro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="96dp"
+        android:layout_marginTop="8dp"
+        android:text="Registrar Nuevo Libro"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lblTituloListado" />
 </androidx.constraintlayout.widget.ConstraintLayout>
