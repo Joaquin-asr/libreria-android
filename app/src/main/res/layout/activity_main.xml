@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FAF9F6">
@@ -24,84 +25,162 @@
         android:id="@+id/inputLayoutTitulo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:boxStrokeColor="#795548"
+        android:layout_margin="16dp"
         app:boxBackgroundMode="outline"
-        app:layout_constraintTop_toBottomOf="@id/lblTitulo"
-        app:layout_constraintStart_toStartOf="parent"
+        app:boxStrokeColor="#795548"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lblTitulo">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/txtTitulo"
-            android:hint="Título"
-            android:inputType="textCapWords"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="Título"
+            android:inputType="textCapWords" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/inputLayoutPrecio"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:boxStrokeColor="#795548"
+        android:layout_margin="16dp"
+        android:layout_marginTop="19dp"
         app:boxBackgroundMode="outline"
-        app:layout_constraintTop_toBottomOf="@id/inputLayoutTitulo"
-        app:layout_constraintStart_toStartOf="parent"
+        app:boxStrokeColor="#795548"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputLayoutFchaPublica">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/txtPrecio"
-            android:hint="Precio (S/.)"
-            android:inputType="numberDecimal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="Precio (S/.)"
+            android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/inputLayoutStock"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:boxStrokeColor="#795548"
+        android:layout_margin="16dp"
+        android:layout_marginTop="15dp"
         app:boxBackgroundMode="outline"
-        app:layout_constraintTop_toBottomOf="@id/inputLayoutPrecio"
-        app:layout_constraintStart_toStartOf="parent"
+        app:boxStrokeColor="#795548"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputLayoutPrecio">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/txtStock"
-            android:hint="Stock"
-            android:inputType="number"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="Stock"
+            android:inputType="number" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayoutDescripcion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="19dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputLayoutTitulo">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/txtDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:hint="Descripcion" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayoutFchaPublica"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputLayoutDescripcion">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/txtFchaPublica"
+            android:layout_width="375dp"
+            android:layout_height="wrap_content"
+            android:hint="Fecha Publicación" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayoutAutor"
+        android:layout_width="374dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="21dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputLayoutStock">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/txtAutor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Autor" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRegistrar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_marginTop="9dp"
+        android:backgroundTint="#6D4C41"
         android:text="Registrar Libro"
         android:textAllCaps="false"
-        android:backgroundTint="#6D4C41"
         android:textColor="@android:color/white"
         app:cornerRadius="8dp"
-        app:layout_constraintTop_toBottomOf="@id/inputLayoutStock"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/InputLayoutPortada" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnListado"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="#A1887F"
         android:text="Ver Listado"
         android:textAllCaps="false"
-        android:backgroundTint="#A1887F"
         android:textColor="@android:color/white"
         app:cornerRadius="8dp"
-        app:layout_constraintTop_toBottomOf="@id/btnRegistrar"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        app:layout_constraintHorizontal_bias="0.406"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnRegistrar" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/InputLayoutPortada"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="22dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputLayoutAutor">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/txtPortada"
+            android:layout_width="403dp"
+            android:layout_height="46dp"
+            android:hint="Portada (titulolibro.jpg)" />
+    </com.google.android.material.textfield.TextInputLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

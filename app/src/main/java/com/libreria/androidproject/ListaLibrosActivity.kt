@@ -42,7 +42,8 @@ class ListaLibrosActivity : AppCompatActivity() {
 
     private fun cargarLista() {
         libros = dbHelper.obtenerLibro().toMutableList()
-        val titulos = libros.map { "${it.titulo} - S/.${it.precio} - Stock:${it.stock}" }
+        val titulos = libros.map { "${it.titulo} - ${it.descripcion}  - ${it.fchpub} " +
+                " - S/.${it.precio} - Stock:${it.stock} - Autor: ${it.autor} - ${it.portada} " }
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, titulos)
         listView.adapter = adapter
     }
@@ -52,20 +53,32 @@ class ListaLibrosActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
         }
         val inputTitulo = EditText(this).apply { setText(libro.titulo) }
+        val inputDescripcion = EditText(this).apply { setText(libro.descripcion) }
+        val inputFchPublica = EditText(this).apply { setText(libro.fchpub) }
         val inputPrecio = EditText(this).apply { setText(libro.precio.toString()) }
         val inputStock = EditText(this).apply { setText(libro.stock.toString()) }
+        val inputAutor = EditText(this).apply { setText(libro.autor) }
+        val inputPortada = EditText(this).apply { setText(libro.portada) }
 
         layout.addView(inputTitulo)
+        layout.addView(inputDescripcion)
+        layout.addView(inputFchPublica)
         layout.addView(inputPrecio)
         layout.addView(inputStock)
+        layout.addView(inputAutor)
+        layout.addView(inputPortada)
 
         AlertDialog.Builder(this)
             .setTitle("Actualizar Libro")
             .setView(layout)
             .setPositiveButton("Guardar") { _, _ ->
                 libro.titulo = inputTitulo.text.toString()
+                libro.descripcion = inputDescripcion.text.toString()
+                libro.fchpub = inputFchPublica.text.toString()
                 libro.precio = inputPrecio.text.toString().toDoubleOrNull() ?: 0.0
                 libro.stock = inputStock.text.toString().toIntOrNull() ?: 0
+                libro.autor = inputAutor.text.toString()
+                libro.portada = inputPortada.text.toString()
                 dbHelper.actualizarLibro(libro)
                 cargarLista()
             }

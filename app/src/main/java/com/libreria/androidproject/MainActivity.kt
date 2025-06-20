@@ -24,19 +24,32 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         dbHelper = LibroDBHelper(this)
         val txtTitulo = findViewById<EditText>(R.id.txtTitulo)
+        val txtDescripcion = findViewById<EditText>(R.id.txtDescripcion)
+        val txtFchPublicacion = findViewById<EditText>(R.id.txtFchaPublica)
         val txtPrecio = findViewById<EditText>(R.id.txtPrecio)
         val txtStock = findViewById<EditText>(R.id.txtStock)
+        val txtAutor = findViewById<EditText>(R.id.txtAutor)
+        val txtPortada = findViewById<EditText>(R.id.txtPortada)
         val btnRegistrar = findViewById<Button>(R.id.btnRegistrar)
         val btnIrListado = findViewById<Button>(R.id.btnListado)
         btnRegistrar.setOnClickListener {
             val titulo = txtTitulo.text.toString()
+            val descripcion = txtDescripcion.text.toString()
+            val fchapublicacion = txtFchPublicacion.text.toString()
             val precio = txtPrecio.text.toString().toDoubleOrNull() ?: 0.0
             val stock = txtStock.text.toString().toIntOrNull() ?: 0
-            val libro = Libro(titulo = titulo, precio = precio, stock = stock)
+            val autor = txtAutor.text.toString()
+            val portada = txtPortada.text.toString()
+            val libro = Libro(titulo = titulo, descripcion = descripcion, fchpub = fchapublicacion,
+                precio = precio, stock = stock, autor = autor, portada = portada)
             dbHelper.insertarLibro(libro)
             txtTitulo.text.clear()
+            txtDescripcion.text.clear()
+            txtFchPublicacion.text.clear()
             txtPrecio.text.clear()
             txtStock.text.clear()
+            txtAutor.text.clear()
+            txtPortada.text.clear()
         }
 
         btnIrListado.setOnClickListener {
