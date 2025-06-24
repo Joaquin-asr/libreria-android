@@ -112,7 +112,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/txtFchaPublica"
-            android:layout_width="375dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Fecha Publicación" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -162,7 +162,6 @@
         android:textColor="@android:color/white"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.406"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnRegistrar" />
 
@@ -179,8 +178,8 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/txtPortada"
-            android:layout_width="403dp"
-            android:layout_height="46dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Portada (titulolibro.jpg)" />
     </com.google.android.material.textfield.TextInputLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

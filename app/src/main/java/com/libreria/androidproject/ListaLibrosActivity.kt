@@ -1,23 +1,21 @@
 package com.libreria.androidproject
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
+import android.view.LayoutInflater
 import android.widget.Button
+import android.view.View
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.ListView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.libreria.androidproject.R.id.lisLibros
 
 class ListaLibrosActivity : AppCompatActivity() {
+
     private lateinit var dbHelper: LibroDBHelper
     private lateinit var listView: ListView
-    private lateinit var adapter: ArrayAdapter<String>
+    private lateinit var btnRegistrarNuevo: Button
     private var libros = mutableListOf<Libro>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,67 +23,65 @@ class ListaLibrosActivity : AppCompatActivity() {
         setContentView(R.layout.activity_lista_libros)
 
         dbHelper = LibroDBHelper(this)
-        listView = findViewById(lisLibros)
-        val btnRegistrarNuevoLibro = findViewById<Button>(R.id.btnNuevoLibro)
+        listView = findViewById(R.id.lisLibros)
+        btnRegistrarNuevo = findViewById(R.id.btnNuevoLibro)
 
         listView.setOnItemClickListener { _, _, position, _ ->
-            val libro = libros[position]
-            mostrarDialogoEditar(libro)
+            mostrarDialogoEditar(libros[position])
+        }
+
+        btnRegistrarNuevo.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
         cargarLista()
-
-        btnRegistrarNuevoLibro.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-        }
     }
 
     private fun cargarLista() {
         libros = dbHelper.obtenerLibro().toMutableList()
-        val titulos = libros.map { "${it.titulo} - ${it.descripcion}  - ${it.fchpub} " +
-                " - S/.${it.precio} - Stock:${it.stock} - Autor: ${it.autor} - ${it.portada} " }
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, titulos)
-        listView.adapter = adapter
+        listView.adapter = LibroAdapter(this, libros)
     }
 
     private fun mostrarDialogoEditar(libro: Libro) {
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-        val inputTitulo = EditText(this).apply { setText(libro.titulo) }
-        val inputDescripcion = EditText(this).apply { setText(libro.descripcion) }
-        val inputFchPublica = EditText(this).apply { setText(libro.fchpub) }
-        val inputPrecio = EditText(this).apply { setText(libro.precio.toString()) }
-        val inputStock = EditText(this).apply { setText(libro.stock.toString()) }
-        val inputAutor = EditText(this).apply { setText(libro.autor) }
-        val inputPortada = EditText(this).apply { setText(libro.portada) }
+        val dlgView: View = LayoutInflater
+            .from(this)
+            .inflate(R.layout.dialog_update_libro, null, false)
 
-        layout.addView(inputTitulo)
-        layout.addView(inputDescripcion)
-        layout.addView(inputFchPublica)
-        layout.addView(inputPrecio)
-        layout.addView(inputStock)
-        layout.addView(inputAutor)
-        layout.addView(inputPortada)
+        val etTitulo      = dlgView.findViewById<EditText>(R.id.etTitulo)
+        val etDescripcion = dlgView.findViewById<EditText>(R.id.etDescripcion)
+        val etFchPub      = dlgView.findViewById<EditText>(R.id.etFchPub)
+        val etPrecio      = dlgView.findViewById<EditText>(R.id.etPrecio)
+        val etStock       = dlgView.findViewById<EditText>(R.id.etStock)
+        val etAutor       = dlgView.findViewById<EditText>(R.id.etAutor)
+        val etPortada     = dlgView.findViewById<EditText>(R.id.etPortada)
+
+        etTitulo.setText(libro.titulo)
+        etDescripcion.setText(libro.descripcion)
+        etFchPub.setText(libro.fchpub)
+        etPrecio.setText(libro.precio.toString())
+        etStock.setText(libro.stock.toString())
+        etAutor.setText(libro.autor)
+        etPortada.setText(libro.portada)
 
         AlertDialog.Builder(this)
             .setTitle("Actualizar Libro")
-            .setView(layout)
-            .setPositiveButton("Guardar") { _, _ ->
-                libro.titulo = inputTitulo.text.toString()
-                libro.descripcion = inputDescripcion.text.toString()
-                libro.fchpub = inputFchPublica.text.toString()
-                libro.precio = inputPrecio.text.toString().toDoubleOrNull() ?: 0.0
-                libro.stock = inputStock.text.toString().toIntOrNull() ?: 0
-                libro.autor = inputAutor.text.toString()
-                libro.portada = inputPortada.text.toString()
+            .setView(dlgView)
+            .setPositiveButton("Guardar", DialogInterface.OnClickListener { _, _ ->
+                // Guarda cambios
+                libro.titulo      = etTitulo.text.toString()
+                libro.descripcion = etDescripcion.text.toString()
+                libro.fchpub      = etFchPub.text.toString()
+                libro.precio      = etPrecio.text.toString().toDoubleOrNull() ?: 0.0
+                libro.stock       = etStock.text.toString().toIntOrNull() ?: 0
+                libro.autor       = etAutor.text.toString()
+                libro.portada     = etPortada.text.toString()
                 dbHelper.actualizarLibro(libro)
                 cargarLista()
-            }
-            .setNegativeButton("Eliminar") { _, _ ->
+            })
+            .setNegativeButton("Eliminar", DialogInterface.OnClickListener { _, _ ->
                 dbHelper.eliminarLibro(libro.cod)
                 cargarLista()
-            }
+            })
             .setNeutralButton("Cancelar", null)
             .show()
     }
