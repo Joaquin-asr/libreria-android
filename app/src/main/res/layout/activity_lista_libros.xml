@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"/>
 
     <ListView
         android:id="@+id/lisLibros"
@@ -27,12 +27,11 @@
         android:divider="#BCAAA4"
         android:dividerHeight="1dp"
         android:padding="8dp"
-        android:background="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@+id/lblTituloListado"
-        app:layout_constraintBottom_toTopOf="@+id/btnNuevoLibro"
+        app:layout_constraintTop_toBottomOf="@id/lblTituloListado"
+        app:layout_constraintBottom_toTopOf="@id/btnNuevoLibro"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnNuevoLibro"
@@ -40,14 +39,14 @@
         android:layout_height="wrap_content"
         android:text="Registrar Nuevo Libro"
         android:textAllCaps="false"
-        android:backgroundTint="#8D6E63"
-        android:textColor="@android:color/white"
-        app:cornerRadius="8dp"
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="@android:color/white"
         app:iconPadding="8dp"
+        app:cornerRadius="8dp"
+        app:backgroundTint="#8D6E63"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
