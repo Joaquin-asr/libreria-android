@@ -27,10 +27,13 @@ class MainActivity : AppCompatActivity() {
     private var fechaSeleccionada: Long = 0L
     private var uriPortada: Uri? = null
 
-    private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+    private val pickDocumentLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
+            contentResolver.takePersistableUriPermission(
+                it, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
             uriPortada = it
             contentResolver.query(it, null, null, null, null)?.use { cursor ->
                 val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -74,16 +77,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         txtPortada.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            pickDocumentLauncher.launch(arrayOf("image/*"))
         }
 
         findViewById<Button>(R.id.btnRegistrar).setOnClickListener {
+            val campos = listOf(txtTitulo, txtDescripcion, txtFchPublicacion,
+                txtPrecio, txtStock, txtAutor)
+
+            val todosValidos = campos
+                .map { it.validateRequired() }
+                .all { it }
+
+            if (!todosValidos) return@setOnClickListener
+
             val libro = Libro(
                 titulo      = txtTitulo.text.toString(),
                 descripcion = txtDescripcion.text.toString(),
                 fchpub      = fechaSeleccionada,
-                precio      = txtPrecio.text.toString().toDoubleOrNull() ?: 0.0,
-                stock       = txtStock.text.toString().toIntOrNull() ?: 0,
+                precio      = txtPrecio.text.toString().toDouble(),
+                stock       = txtStock.text.toString().toInt(),
                 autor       = txtAutor.text.toString(),
                 portadaUri  = uriPortada?.toString() ?: ""
             )

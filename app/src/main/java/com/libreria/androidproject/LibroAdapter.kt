@@ -35,7 +35,11 @@ class LibroAdapter(
         tvPrecio.text      = "S/.${"%.2f".format(libro.precio)}  •  Stock: ${libro.stock}"
 
         if (libro.portadaUri.isNotEmpty()) {
-            imgPortada.setImageURI(Uri.parse(libro.portadaUri))
+            try {
+                imgPortada.setImageURI(Uri.parse(libro.portadaUri))
+            } catch (e: SecurityException) {
+                imgPortada.setImageResource(R.drawable.ic_book)
+            }
         } else {
             imgPortada.setImageResource(R.drawable.ic_book)
         }
