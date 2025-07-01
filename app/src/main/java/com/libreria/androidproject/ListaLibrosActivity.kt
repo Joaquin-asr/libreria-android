@@ -1,47 +1,50 @@
 package com.libreria.androidproject
 
 import android.app.DatePickerDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
-import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import java.util.*
+
 
 class ListaLibrosActivity : AppCompatActivity() {
 
-    private lateinit var dbHelper: LibroDBHelper
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var listView: ListView
     private lateinit var btnNuevo: Button
     private var libros = mutableListOf<Libro>()
 
     private var fechaTmp: Long = 0L
     private var uriTmp: Uri? = null
+    private var portadaNombreTmp: String = ""
     private var currentPortadaEditText: EditText? = null
 
     private val pickDocForEditLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            contentResolver.takePersistableUriPermission(
-                it, Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
+            contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             uriTmp = it
+
+            var nombreArchivo = ""
             contentResolver.query(it, null, null, null, null)?.use { c ->
                 val idx = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (c.moveToFirst()) {
-                    currentPortadaEditText?.setText(c.getString(idx))
-                }
+                if (c.moveToFirst()) nombreArchivo = c.getString(idx)
             }
+            currentPortadaEditText?.setText(nombreArchivo)
+            portadaNombreTmp = nombreArchivo
         }
     }
 
@@ -49,27 +52,47 @@ class ListaLibrosActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_libros)
 
-        dbHelper = LibroDBHelper(this)
         listView = findViewById(R.id.lisLibros)
         btnNuevo = findViewById(R.id.btnNuevoLibro)
+        listView.adapter = LibroAdapter(this, libros)
+
+        btnNuevo.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
 
         listView.setOnItemClickListener { _, _, pos, _ ->
             mostrarDialogoEditar(libros[pos])
         }
-        btnNuevo.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-        }
-        cargarLista()
-    }
 
-    private fun cargarLista() {
-        libros = dbHelper.obtenerLibro().toMutableList()
-        listView.adapter = LibroAdapter(this, libros)
+        // aqui cargamos lista
+        db.collection("libros")
+            .get(Source.CACHE)
+            .addOnSuccessListener { snapshot ->
+                libros.clear()
+                snapshot.documents.forEach { doc ->
+                    val l = doc.toObject(Libro::class.java)!!.apply { cod = doc.id }
+                    libros.add(l)
+                }
+                (listView.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+            }
+
+        //aqui se escucha cambios desde el serv
+        db.collection("libros")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null || snapshot == null) return@addSnapshotListener
+                libros.clear()
+                snapshot.documents.forEach { doc ->
+                    val l = doc.toObject(Libro::class.java)!!.apply { cod = doc.id }
+                    libros.add(l)
+                }
+                (listView.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+            }
     }
 
     private fun mostrarDialogoEditar(libro: Libro) {
-        fechaTmp = 0L
-        uriTmp = null
+        fechaTmp = libro.fchpub
+        uriTmp = if (libro.portadaUri.isNotEmpty()) Uri.parse(libro.portadaUri) else null
+        portadaNombreTmp = libro.portadaNombre
         currentPortadaEditText = null
 
         val dlgView = LayoutInflater.from(this)
@@ -83,76 +106,67 @@ class ListaLibrosActivity : AppCompatActivity() {
         val etA  = dlgView.findViewById<EditText>(R.id.etAutor)
         val etPo = dlgView.findViewById<EditText>(R.id.etPortada)
 
+
         etT.setText(libro.titulo)
         etD.setText(libro.descripcion)
-        etF.setText(
-            java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                .format(Date(libro.fchpub))
-        )
+        etF.setText(java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            .format(Date(libro.fchpub)))
         etP.setText(libro.precio.toString())
         etS.setText(libro.stock.toString())
         etA.setText(libro.autor)
-        if (libro.portadaUri.isNotEmpty()) {
-            contentResolver.query(Uri.parse(libro.portadaUri), null, null, null, null)
-                ?.use { c ->
-                    val idx = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    if (c.moveToFirst()) etPo.setText(c.getString(idx))
-                }
-            uriTmp = Uri.parse(libro.portadaUri)
+        if (libro.portadaNombre.isNotEmpty()) {
+            etPo.setText(libro.portadaNombre)
         }
 
         etF.setOnClickListener {
-            val calendar = Calendar.getInstance().apply { timeInMillis = libro.fchpub }
+            val cal = Calendar.getInstance().apply { timeInMillis = fechaTmp }
             DatePickerDialog(this,
                 { _, y, m, d ->
-                    calendar.set(y, m, d)
-                    fechaTmp = calendar.timeInMillis
-                    etF.setText(
-                        java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            .format(calendar.time)
-                    )
+                    cal.set(y, m, d)
+                    fechaTmp = cal.timeInMillis
+                    etF.setText(java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        .format(cal.time))
                 },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
-
         etPo.setOnClickListener {
             currentPortadaEditText = etPo
             pickDocForEditLauncher.launch(arrayOf("image/*"))
         }
 
-        val camposObligatorios = listOf(etT, etD, etF, etP, etS, etA)
-
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Actualizar Libro")
+            .setTitle("Editar Libro")
             .setView(dlgView)
             .setNegativeButton("Eliminar") { _, _ ->
-                dbHelper.eliminarLibro(libro.cod)
-                cargarLista()
+                db.collection("libros").document(libro.cod)
+                    .delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show()
+                        recreate()
+                    }
             }
             .setNeutralButton("Cancelar", null)
-            .setPositiveButton("Guardar", null)
+            .setPositiveButton("Guardar") { _, _ ->
+                libro.apply {
+                    titulo      = etT.text.toString()
+                    descripcion = etD.text.toString()
+                    fchpub      = fechaTmp
+                    precio      = etP.text.toString().toDouble()
+                    stock       = etS.text.toString().toInt()
+                    autor       = etA.text.toString()
+                    portadaUri  = uriTmp?.toString() ?: ""
+                    portadaNombre = portadaNombreTmp
+                }
+                db.collection("libros").document(libro.cod)
+                    .set(libro.toMap())
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Actualizado", Toast.LENGTH_SHORT).show()
+                        recreate()
+                    }
+            }
             .show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            val todosValidos = camposObligatorios
-                .map { it.validateRequired() }
-                .all { it }
-            if (!todosValidos) return@setOnClickListener
-
-            libro.titulo      = etT.text.toString()
-            libro.descripcion = etD.text.toString()
-            libro.fchpub      = if (fechaTmp != 0L) fechaTmp else libro.fchpub
-            libro.precio      = etP.text.toString().toDouble()
-            libro.stock       = etS.text.toString().toInt()
-            libro.autor       = etA.text.toString()
-            libro.portadaUri  = uriTmp?.toString() ?: libro.portadaUri
-
-            dbHelper.actualizarLibro(libro)
-            cargarLista()
-            dialog.dismiss()
-        }
     }
 }
