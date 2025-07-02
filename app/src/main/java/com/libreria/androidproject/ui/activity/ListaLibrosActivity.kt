@@ -1,30 +1,37 @@
-package com.libreria.androidproject
+package com.libreria.androidproject.ui.activity
 
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.view.LayoutInflater
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Source
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.Timestamp
+import com.libreria.androidproject.R
+import com.libreria.androidproject.model.Libro
+import com.libreria.androidproject.repository.FirestoreLibroRepository
+import com.libreria.androidproject.ui.activity.adapter.LibroAdapter
+import com.libreria.androidproject.util.validateRequired
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.*
 
 
 class ListaLibrosActivity : AppCompatActivity() {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val repo = FirestoreLibroRepository()
     private lateinit var listView: ListView
+    private lateinit var progress: ProgressBar
     private lateinit var btnNuevo: Button
     private var libros = mutableListOf<Libro>()
+    private lateinit var adapter: LibroAdapter
 
     private var fechaTmp: Long = 0L
     private var uriTmp: Uri? = null
@@ -37,14 +44,13 @@ class ListaLibrosActivity : AppCompatActivity() {
         uri?.let {
             contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             uriTmp = it
-
-            var nombreArchivo = ""
-            contentResolver.query(it, null, null, null, null)?.use { c ->
+            val nombre = contentResolver.query(it, null, null, null, null)?.use { c ->
                 val idx = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (c.moveToFirst()) nombreArchivo = c.getString(idx)
-            }
-            currentPortadaEditText?.setText(nombreArchivo)
-            portadaNombreTmp = nombreArchivo
+                c.moveToFirst()
+                c.getString(idx)
+            } ?: ""
+            currentPortadaEditText?.setText(nombre)
+            portadaNombreTmp = nombre
         }
     }
 
@@ -53,50 +59,47 @@ class ListaLibrosActivity : AppCompatActivity() {
         setContentView(R.layout.activity_lista_libros)
 
         listView = findViewById(R.id.lisLibros)
+        progress = findViewById(R.id.progress)
         btnNuevo = findViewById(R.id.btnNuevoLibro)
-        listView.adapter = LibroAdapter(this, libros)
+
+        adapter = LibroAdapter(this, libros)
+        listView.adapter = adapter
 
         btnNuevo.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
         }
-
         listView.setOnItemClickListener { _, _, pos, _ ->
             mostrarDialogoEditar(libros[pos])
         }
 
-        // aqui cargamos lista
-        db.collection("libros")
-            .get(Source.CACHE)
-            .addOnSuccessListener { snapshot ->
-                libros.clear()
-                snapshot.documents.forEach { doc ->
-                    val l = doc.toObject(Libro::class.java)!!.apply { cod = doc.id }
-                    libros.add(l)
-                }
-                (listView.adapter as ArrayAdapter<*>).notifyDataSetChanged()
-            }
 
-        //aqui se escucha cambios desde el serv
-        db.collection("libros")
-            .addSnapshotListener { snapshot, e ->
-                if (e != null || snapshot == null) return@addSnapshotListener
-                libros.clear()
-                snapshot.documents.forEach { doc ->
-                    val l = doc.toObject(Libro::class.java)!!.apply { cod = doc.id }
-                    libros.add(l)
-                }
-                (listView.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+        // se obtienen  libros
+        lifecycleScope.launch {
+            progress.visibility = View.VISIBLE
+            val inicial = withContext(Dispatchers.IO) {
+                repo.getAllLibrosFromCache()
             }
+            libros.clear()
+            libros.addAll(inicial)
+            adapter.notifyDataSetChanged()
+            progress.visibility = View.GONE
+        }
+
+        // se suscriben cambios al firestore
+        repo.listenAllLibros { updated ->
+            libros.clear()
+            libros.addAll(updated)
+            runOnUiThread { adapter.notifyDataSetChanged() }
+        }
     }
 
     private fun mostrarDialogoEditar(libro: Libro) {
-        fechaTmp = libro.fchpub
+        fechaTmp = libro.fchpub?.toDate()?.time ?: 0L
         uriTmp = if (libro.portadaUri.isNotEmpty()) Uri.parse(libro.portadaUri) else null
         portadaNombreTmp = libro.portadaNombre
         currentPortadaEditText = null
 
-        val dlgView = LayoutInflater.from(this)
-            .inflate(R.layout.dialog_update_libro, null, false)
+        val dlgView = layoutInflater.inflate(R.layout.dialog_update_libro, null)
 
         val etT  = dlgView.findViewById<EditText>(R.id.etTitulo)
         val etD  = dlgView.findViewById<EditText>(R.id.etDescripcion)
@@ -109,8 +112,10 @@ class ListaLibrosActivity : AppCompatActivity() {
 
         etT.setText(libro.titulo)
         etD.setText(libro.descripcion)
-        etF.setText(java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            .format(Date(libro.fchpub)))
+        etF.setText(
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                .format(libro.fchpub?.toDate() ?: Date())
+        )
         etP.setText(libro.precio.toString())
         etS.setText(libro.stock.toString())
         etA.setText(libro.autor)
@@ -137,35 +142,34 @@ class ListaLibrosActivity : AppCompatActivity() {
             pickDocForEditLauncher.launch(arrayOf("image/*"))
         }
 
-        val dialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Editar Libro")
             .setView(dlgView)
             .setNegativeButton("Eliminar") { _, _ ->
-                db.collection("libros").document(libro.cod)
-                    .delete()
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show()
-                        recreate()
-                    }
+                lifecycleScope.launch {
+                    repo.deleteLibro(libro.cod)
+                    recreate()
+                }
             }
             .setNeutralButton("Cancelar", null)
             .setPositiveButton("Guardar") { _, _ ->
+                val campos = listOf(etT, etD, etF, etP, etS, etA)
+                if (!campos.map { it.validateRequired() }.all { it }) return@setPositiveButton
+
                 libro.apply {
-                    titulo      = etT.text.toString()
-                    descripcion = etD.text.toString()
-                    fchpub      = fechaTmp
-                    precio      = etP.text.toString().toDouble()
-                    stock       = etS.text.toString().toInt()
-                    autor       = etA.text.toString()
-                    portadaUri  = uriTmp?.toString() ?: ""
+                    titulo        = etT.text.toString()
+                    descripcion   = etD.text.toString()
+                    fchpub      = Timestamp(Date(fechaTmp))
+                    precio        = etP.text.toString().toDouble()
+                    stock         = etS.text.toString().toInt()
+                    autor         = etA.text.toString()
+                    portadaUri    = uriTmp?.toString() ?: portadaUri
                     portadaNombre = portadaNombreTmp
                 }
-                db.collection("libros").document(libro.cod)
-                    .set(libro.toMap())
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Actualizado", Toast.LENGTH_SHORT).show()
-                        recreate()
-                    }
+                lifecycleScope.launch {
+                    repo.updateLibro(libro)
+                    recreate()
+                }
             }
             .show()
     }

@@ -1,4 +1,4 @@
-package com.libreria.androidproject
+package com.libreria.androidproject.ui.activity
 
 
 import android.app.DatePickerDialog
@@ -11,12 +11,19 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.Timestamp
+import com.libreria.androidproject.R
+import com.libreria.androidproject.model.Libro
+import com.libreria.androidproject.repository.FirestoreLibroRepository
+import com.libreria.androidproject.util.validateRequired
+import kotlinx.coroutines.launch
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val repo = FirestoreLibroRepository()
+
     private lateinit var txtTitulo: EditText
     private lateinit var txtDescripcion: EditText
     private lateinit var txtFchPublicacion: EditText
@@ -82,31 +89,36 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnRegistrar).setOnClickListener {
             val campos = listOf(txtTitulo, txtDescripcion, txtFchPublicacion, txtPrecio, txtStock, txtAutor)
-            val validos = campos.map { it.validateRequired() }.all { it }
-            if (!validos) return@setOnClickListener
+            if (!campos.map { it.validateRequired() }.all { it }) return@setOnClickListener
 
             val libro = Libro(
                 titulo      = txtTitulo.text.toString(),
                 descripcion = txtDescripcion.text.toString(),
-                fchpub      = fechaSeleccionada,
+                fchpub      = Timestamp(Date(fechaSeleccionada)),
                 precio      = txtPrecio.text.toString().toDouble(),
                 stock       = txtStock.text.toString().toInt(),
                 autor       = txtAutor.text.toString(),
                 portadaUri  = uriPortada?.toString() ?: "",
                 portadaNombre  = portadaNombreSeleccionada
-
             )
 
-            // aqui se inserta a la coleccion
-            db.collection("libros")
-                .add(libro.toMap())
-                .addOnSuccessListener {
-                    Toast.makeText(this, "Libro agregado (ID=${it.id})", Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                try {
+                    val id = repo.addLibro(libro)
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Libro agregado (ID=$id)",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     clearFields()
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+            }
         }
 
         findViewById<Button>(R.id.btnListado).setOnClickListener {

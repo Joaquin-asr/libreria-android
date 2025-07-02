@@ -1,4 +1,4 @@
-package com.libreria.androidproject
+package com.libreria.androidproject.ui.activity.adapter
 
 import android.content.Context
 import android.net.Uri
@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.libreria.androidproject.R
+import com.libreria.androidproject.model.Libro
+import java.util.Locale
 
 class LibroAdapter(
     ctx: Context,
@@ -30,8 +32,9 @@ class LibroAdapter(
         tvTitulo.text      = libro.titulo
         tvDesc.text        = libro.descripcion
         tvAutor.text       = "Autor: ${libro.autor}"
-        val fmt = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
-        tvFecha.text       = fmt.format(java.util.Date(libro.fchpub))
+        val fmt = java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val fechaDate = libro.fchpub?.toDate() ?: java.util.Date()
+        tvFecha.text = fmt.format(fechaDate)
         tvPrecio.text      = "S/.${"%.2f".format(libro.precio)}  •  Stock: ${libro.stock}"
 
         if (libro.portadaUri.isNotEmpty()) {

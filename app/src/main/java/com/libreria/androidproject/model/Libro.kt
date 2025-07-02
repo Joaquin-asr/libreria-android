@@ -1,11 +1,12 @@
-package com.libreria.androidproject
+package com.libreria.androidproject.model
 
+import com.google.firebase.Timestamp
 
 data class Libro(
     var cod: String = "",
     var titulo: String = "",
     var descripcion: String = "",
-    var fchpub: Long = 0L,
+    var fchpub: Timestamp? = null,
     var precio: Double = 0.0,
     var stock: Int = 0,
     var autor: String = "",
@@ -16,7 +17,7 @@ data class Libro(
     fun toMap(): Map<String, Any> = mapOf(
         "titulo" to titulo,
         "descripcion" to descripcion,
-        "fchpub" to fchpub,
+        "fchpub" to (fchpub ?: Timestamp.now()),
         "precio" to precio,
         "stock" to stock,
         "autor" to autor,

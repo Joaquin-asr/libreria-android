@@ -86,7 +86,7 @@
                 android:id="@+id/btnAddToCart"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Añadir al Carrito"
+                android:text="Comprar Libro"
                 android:textAllCaps="false"
                 app:cornerRadius="8dp"
                 app:backgroundTint="#8D6E63"
