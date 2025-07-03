@@ -2,6 +2,7 @@ package com.libreria.androidproject.repository
 
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Source
 import com.libreria.androidproject.model.Libro
 import kotlinx.coroutines.tasks.await
@@ -29,11 +30,13 @@ class FirestoreLibroRepository {
         }
     }
 
-    fun listenAllLibros(onChange: (List<Libro>) -> Unit) =
-        db.addSnapshotListener { snap, e ->
-            if (snap == null || e != null) return@addSnapshotListener
-            onChange(snap.documents.map {
-                it.toObject(Libro::class.java)!!.apply { cod = it.id }
-            })
+    fun listenAllLibros(onChange: (List<Libro>) -> Unit): ListenerRegistration {
+        return db.addSnapshotListener { snapshot, error ->
+            if (error != null || snapshot == null) return@addSnapshotListener
+            val lista = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Libro::class.java)?.apply { cod = doc.id }
+            }
+            onChange(lista)
         }
+    }
 }
