@@ -34,9 +34,7 @@ class BookDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_book_detail, container, false)
-    }
+    ): View = inflater.inflate(R.layout.fragment_book_detail, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val pb       = view.findViewById<ProgressBar>(R.id.pbDetail)
@@ -79,22 +77,44 @@ class BookDetailFragment : Fragment() {
                         .into(ivCover)
                 }
 
-                btnBuy.setOnClickListener {
-                    lifecycleScope.launch {
-                        val uid = FirebaseAuthManager.currentUser()?.uid
-                            ?: run {
-                                Toast.makeText(requireContext(), "No autenticado", Toast.LENGTH_SHORT).show()
-                                return@launch
+                val uid = FirebaseAuthManager.currentUser()?.uid
+                if (uid == null) {
+                    Toast.makeText(requireContext(), "No autenticado", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                    return@launch
+                }
+
+                val existing = orderRepo
+                    .getOrdersForUser(uid)
+                    .any { it.libroId == libroId }
+
+                if (existing) {
+                    btnBuy.text = "Libro Comprado"
+                    btnBuy.isEnabled = false
+                } else {
+                    btnBuy.text = "Comprar Libro"
+                    btnBuy.isEnabled = true
+
+                    btnBuy.setOnClickListener {
+                        lifecycleScope.launch {
+                            try {
+                                val order = Order(
+                                    userId    = uid,
+                                    libroId   = libroId,
+                                    timestamp = Timestamp.now()
+                                )
+                                orderRepo.addOrder(order)
+                                Toast.makeText(requireContext(), "¡Libro comprado!", Toast.LENGTH_SHORT).show()
+
+                                btnBuy.text = "Libro Comprado"
+                                btnBuy.isEnabled = false
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Error al comprar", Toast.LENGTH_SHORT).show()
                             }
-                        val order = Order(
-                            userId    = uid,
-                            libroId   = libroId,
-                            timestamp = Timestamp.now()
-                        )
-                        orderRepo.addOrder(order)
-                        Toast.makeText(requireContext(), "¡Libro comprado!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
+
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error al cargar libro", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
