@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF8E1">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollDetail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imgDetailPortada"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:layout_weight="2"
+                android:src="@drawable/ic_book"/>
+
+            <LinearLayout
+                android:id="@+id/containerDetails"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="3"
+                android:paddingStart="16dp">
+
+                <TextView
+                    android:id="@+id/tvDetailTitulo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Título del libro"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#3E2723"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvDetailAutor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Por Autor"
+                    android:textSize="16sp"
+                    android:textColor="#5D4037"
+                    android:layout_marginBottom="12dp"/>
+
+                <TextView
+                    android:id="@+id/tvDetailPrecio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="S/. 45.00"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#6D4C41"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:id="@+id/tvDetailDescripcion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Descripción del libro..."
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:layout_marginBottom="24dp"/>
+
+                <Button
+                    android:id="@+id/btnBuy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Comprar Libro"
+                    android:backgroundTint="#8D6E63"
+                    android:textAllCaps="false"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <ProgressBar
+        android:id="@+id/pbDetail"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+</FrameLayout>

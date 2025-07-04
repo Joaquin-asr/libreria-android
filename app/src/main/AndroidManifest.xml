@@ -36,12 +36,8 @@
             android:name=".ui.activity.UserDashboardActivity"
             android:exported="false"/>
 
-
         <activity
-            android:name=".ui.activity.UserHomeActivity"
-            android:exported="false"/>
-        <activity
-            android:name=".ui.activity.BookDetailActivity"
+            android:name=".ui.activity.fragment.BookDetailFragment"
             android:exported="false"/>
 
     </application>

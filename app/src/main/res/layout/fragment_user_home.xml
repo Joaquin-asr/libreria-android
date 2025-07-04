@@ -89,7 +89,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCategories"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="140dp"
             android:layout_marginTop="8dp"
             android:overScrollMode="never"
             android:clipToPadding="false"
@@ -97,5 +97,11 @@
             android:paddingEnd="8dp"
             android:scrollbars="none"
             android:nestedScrollingEnabled="false"/>
+        <ProgressBar
+            android:id="@+id/progressBarHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import com.libreria.androidproject.R
+import com.libreria.androidproject.ui.activity.fragment.ListaLibrosFragment
+import com.libreria.androidproject.ui.activity.fragment.ProfileFragment
+import com.libreria.androidproject.ui.activity.fragment.RegistrarLibrosFragment
 
 class AdminDashboardActivity : AppCompatActivity() {
 

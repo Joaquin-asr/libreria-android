@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.libreria.androidproject.R
 import com.libreria.androidproject.model.Libro
+import com.libreria.androidproject.ui.activity.UserDashboardActivity
 
 class BookHorizontalAdapter(
     private val items: List<Libro>,
@@ -28,16 +29,17 @@ class BookHorizontalAdapter(
 
     inner class VH(val view: View) : RecyclerView.ViewHolder(view) {
         private val img = view.findViewById<ImageView>(R.id.imgBook)
-        private val tv  = view.findViewById<TextView>(R.id.tvBookTitle)
+        private val tv = view.findViewById<TextView>(R.id.tvBookTitle)
 
         fun bind(l: Libro) {
             tv.text = l.titulo
-            if (l.portadaUri.isNotEmpty()) {
-                img.setImageURI(Uri.parse(l.portadaUri))
-            } else {
-                img.setImageResource(R.drawable.ic_book)
+            if (l.portadaUri.isNotEmpty()) img.setImageURI(Uri.parse(l.portadaUri))
+            else img.setImageResource(R.drawable.ic_book)
+
+            view.setOnClickListener {
+                (view.context as? UserDashboardActivity)
+                    ?.showBookDetail(l.cod)
             }
-            view.setOnClickListener { click(l) }
         }
     }
 }

@@ -13,8 +13,16 @@ import java.util.*
 
 
 class OrderAdapter(
-    private val items: List<Order>
+    private val items: MutableList<Order> = mutableListOf(),
+    private var titleMap: Map<String, String> = emptyMap()
 ) : RecyclerView.Adapter<OrderAdapter.VH>() {
+
+    fun update(newItems: List<Order>, newTitles: Map<String, String>) {
+        items.clear()
+        items.addAll(newItems)
+        titleMap = newTitles
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val view = LayoutInflater.from(parent.context)
@@ -29,14 +37,14 @@ class OrderAdapter(
     }
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        private val tvOrderId   = view.findViewById<TextView>(R.id.tvOrderId)
+        private val tvOrderId = view.findViewById<TextView>(R.id.tvOrderId)
         private val tvOrderDate = view.findViewById<TextView>(R.id.tvOrderDate)
 
-        fun bind(o: Order) {
-            tvOrderId.text = "Pedido: ${o.id}"
-            val date = o.timestamp.toDate()
+        fun bind(order: Order) {
+            val title = titleMap[order.libroId] ?: "Pedido: ${order.id}"
+            tvOrderId.text = "Libro: $title"
             val fmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            tvOrderDate.text = fmt.format(date)
+            tvOrderDate.text = fmt.format(order.timestamp.toDate())
         }
     }
 }

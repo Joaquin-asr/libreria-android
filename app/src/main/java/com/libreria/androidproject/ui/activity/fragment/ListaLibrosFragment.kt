@@ -1,4 +1,4 @@
-package com.libreria.androidproject.ui.activity
+package com.libreria.androidproject.ui.activity.fragment
 
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -18,6 +18,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.libreria.androidproject.R
 import com.libreria.androidproject.model.Libro
 import com.libreria.androidproject.repository.FirestoreLibroRepository
+import com.libreria.androidproject.ui.activity.AdminDashboardActivity
 import com.libreria.androidproject.ui.activity.adapter.LibroAdapter
 import com.libreria.androidproject.util.validateRequired
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +77,6 @@ class ListaLibrosFragment : Fragment() {
         listView.adapter = adapter
 
         btnNuevo.setOnClickListener {
-            // mostrar pestaña Registrar:
             (activity as? AdminDashboardActivity)?.selectTab(0)
         }
 

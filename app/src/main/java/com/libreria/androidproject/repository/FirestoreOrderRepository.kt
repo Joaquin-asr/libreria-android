@@ -1,7 +1,6 @@
 package com.libreria.androidproject.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Source
 import com.libreria.androidproject.model.Order
 import kotlinx.coroutines.tasks.await
 
@@ -14,7 +13,8 @@ class FirestoreOrderRepository {
     }
 
     suspend fun getOrdersForUser(uid: String): List<Order> {
-        val snap = db.whereEqualTo("userId", uid).get(Source.CACHE).await()
+        val snap = db
+            .whereEqualTo("userId", uid).get().await()
         return snap.documents.map {
             it.toObject(Order::class.java)!!.apply { id = it.id }
         }
